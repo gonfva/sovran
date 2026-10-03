@@ -1,0 +1,60 @@
+region               = "eu-west-1"
+aws_profile          = "sovran-ref"
+project_slug         = "sovran"
+reference_account_id = "333333333333"
+vpc_cidr             = "10.0.0.0/16"
+az_count             = 2
+netcheck_image_tag   = "latest"
+
+# Interface endpoints are billed per ENI (~$8/AZ/month each) and are the largest idle
+# cost. They need not span every AZ: private DNS resolves cross-AZ. Minimum 2.
+endpoint_az_count = 2
+
+# SSM is a bring-up tool, not a runtime dependency — three endpoints (~$48/month) for a
+# shell into the no-NAT model subnet. Set true in the SAME apply as model_asg_desired=1
+# whenever the AMI is new or unvalidated; leave false for a known-good demo.
+model_ssm_access = false
+
+# Where images are served from. "s3" (the default) deletes both ECR endpoints by serving
+# images as static objects over the free S3 gateway endpoint, and lets the gateway policy
+# stop allowing the AWS-owned ECR layer bucket — the real reason to do it, more than the
+# ~$32/month. Proven live 2026-08-14, including the full PrivateLink demo against a GPU.
+# Set "ecr" to fall back; that path is still built and tested.
+registry_mode = "s3"
+
+# Only under registry_mode = "s3", and only after scripts/push-images-s3.py has run — the
+# bucket must exist before anything can be pushed, and the digest only exists after the
+# push, so the first apply of a fresh registry leaves these empty and falls back to tags.
+# netcheck_image_digest = "sha256:..."
+# agent_image_digest    = "sha256:..."
+# sync_image_digest     = "sha256:..."
+
+# Model plane is GPU AMI only (Fargate stub removed).
+#
+# An AMI is region-scoped: eu-west-1 and eu-west-2 need separate bakes and separate ids.
+# GPU choice follows the region — g5.xlarge (A10G) in eu-west-1, g6.xlarge (L4) in
+# eu-west-2, where g5 covers only 2 AZs and g6 covers 3. Both are 24GB.
+model_ami_id        = "ami-xxxxxxxx"
+model_asg_desired   = 0
+model_instance_type = "g5.xlarge"
+
+clients = {
+  a = {
+    slug       = "alpha"
+    account_id = "111111111111"
+  }
+  b = {
+    slug       = "beta"
+    account_id = "222222222222"
+  }
+  # c = {
+  #   slug       = "gamma"
+  #   account_id = "444444444444"
+  # }
+}
+
+agent_image_tag       = "latest"
+sync_image_tag        = "latest"
+agent_port            = 8080
+agent_desired_count   = 1
+sync_interval_seconds = 30

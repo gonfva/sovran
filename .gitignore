@@ -1,0 +1,51 @@
+# Local operator config (may contain account IDs; never secrets-as-code)
+infra/config.hcl
+infra/*.auto.tfvars
+infra/**/terraform.tfvars
+
+# Terraform
+**/.terraform/
+**/terraform.tfstate
+**/terraform.tfstate.*
+**/crash.log
+**/crash.*.log
+**/*.tfplan
+**/override.tf
+**/override.tf.json
+**/*_override.tf
+**/*_override.tf.json
+
+# Packer
+packer/manifest.json
+packer/packer_cache/
+packer/*.pkrvars.hcl
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Secrets / credentials (never commit)
+*.pem
+*.key
+.env
+.env.*
+!.env.example
+
+# OS / editor
+.DS_Store
+*.swp
+*~
+.idea/
+.vscode/
